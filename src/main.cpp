@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 
 const unsigned int START_ADDR = 0x200;
@@ -42,6 +43,25 @@ public:
 public:
   Chip8();
   void loadMem(char const *filename);
+  void op00E0();
+  void op00EE();
+  void op1nnn();
+  void op2nnn();
+  void op3xkk();
+  void op4xkk();
+  void op5xy0();
+  void op6xkk();
+  void op7xkk();
+  void op8xy0();
+  void op8xy1();
+  void op8xy2();
+  void op8xy3();
+  void op8xy4();
+  void op8xy5();
+  void op8xy6();
+  void op8xy7();
+  void op8xyE();
+
 };
 
 Chip8::Chip8() {
@@ -60,9 +80,88 @@ void Chip8::loadMem(char const *filename) {
   if (insFile.is_open()) {
     while (insFile.good()) {
       // load the character  read to the memory..
-      mem[count] = insFile.get();
+      mem[START_ADDR + count] = insFile.get();
       ++count;
     }
   }
   insFile.close();
+}
+// CLS: clears the display
+void Chip8::op00E0(){
+ memset(video, 0, sizeof(video));	
+}
+// RET: Return from a subroutine
+void Chip8::op00EE(){
+ --stackPtr;
+ pc = stack[stackPtr];
+}
+// Jump to location nnn
+void Chip8::op1nnn(){
+  auto address = opcode & (0x0FFF);
+  pc = address;
+}
+// CALL
+void Chip8::op2nnn(){
+  auto address = opcode & (0xFFF);
+  ++stackPtr;
+  stack[stackPtr] = pc;
+  pc = address;
+}
+
+void Chip8::op3xkk(){
+  uint8_t  Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t byte = opcode & (0x00FF);
+
+  if(registers[Vx] == byte){
+    pc += 2;	  
+  }
+}
+
+void Chip8::op4xkk(){
+  uint8_t Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t byte = opcode & (0x00FF);
+
+  if(registers[Vx] != byte){
+    pc += 2;
+  }
+}
+
+void Chip8::op5xy0(){
+  uint8_t Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t Vy = (opcode & (0x00F0)) >> 4u;
+
+  if(registers[Vx] == registers[Vy]){
+   pc += 2;	  
+  }
+}
+
+void Chip8::op6xkk(){
+  uint8_t Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t byte = opcode & (0x00FF);
+
+  registers[Vx] = byte;
+}
+
+void Chip8::op7xkk(){
+  uint8_t Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t byte = opcode & (0x00FF);
+
+  registers[Vx] += byte;
+}
+
+void Chip8::op8xy0(){
+  uint8_t Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t Vy = opcode & (0x00F0) >> 4u;
+
+  registers[Vx] = registers[Vy];
+}
+void Chip8::op8xy1(){
+  uint8_t Vx = (opcode & (0x0F00)) >> 8u;
+  uint8_t Vy = opcode & (0x00F0) >> 4u;
+
+  registers[Vx] |= registers[Vy];
+}
+
+void Chip8::op8xy2(){
+	
 }
