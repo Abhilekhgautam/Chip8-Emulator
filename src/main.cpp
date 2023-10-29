@@ -40,6 +40,7 @@ public:
   uint8_t video[64 * 32];
   uint16_t opcode;
 
+  uint8_t VF;
 public:
   Chip8();
   void loadMem(char const *filename);
@@ -61,6 +62,10 @@ public:
   void op8xy6();
   void op8xy7();
   void op8xyE();
+  void op9xy0();
+  void opAnnn();
+  void opBnnn();
+  void opCxkk();
 
 };
 
@@ -151,17 +156,102 @@ void Chip8::op7xkk(){
 
 void Chip8::op8xy0(){
   uint8_t Vx = (opcode & (0x0F00)) >> 8u;
-  uint8_t Vy = opcode & (0x00F0) >> 4u;
+  uint8_t Vy = (opcode & (0x00F0)) >> 4u;
 
   registers[Vx] = registers[Vy];
 }
 void Chip8::op8xy1(){
   uint8_t Vx = (opcode & (0x0F00)) >> 8u;
-  uint8_t Vy = opcode & (0x00F0) >> 4u;
+  uint8_t Vy = (opcode & (0x00F0)) >> 4u;
 
   registers[Vx] |= registers[Vy];
 }
 
 void Chip8::op8xy2(){
-	
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  registers[x]  &=   registers[y];
+}
+
+void Chip8::op8xy3(){
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  registers[x] =  registers[x] xor registers[y];
+}
+
+void Chip8::op8xy4(){
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  int temp = registers[x] + registers[y];
+  if(temp > 255){
+    VF = 1;	  
+  }
+  registers[x] = temp % 256;
+
+}
+// todo: ambigious reference
+void Chip8::op8xy5(){
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  int temp = registers[x] + registers[y];
+  if(temp > 255){
+    VF = 1;	  
+  }
+  registers[x] = temp % 256;
+}
+// buggy: the Chip8 ref seems to be ambigious.
+void Chip8::op8xy6(){
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  //uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  if((registers[x] & 0x0001)){
+   VF = 1;
+   registers[x] = registers[x] / 2;
+  }
+
+}
+
+void Chip8::op8xy7(){
+ //todo	
+}
+
+// buggy: the Chip8 ref seems to be ambigious.
+void Chip8::op8xyE(){
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  //uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  if(((registers[x] & 0x0001)) >> 8u){
+   VF = 1;
+   registers[x] = registers[x] *  2;
+  }
+
+}
+
+void Chip8::op9xy0(){
+   uint8_t x = (opcode & (0x0F00)) >> 8u;
+   uint8_t y = (opcode & (0x00F0)) >> 4u;
+ 
+   if(registers[x] != registers[y]) pc += 2;
+
+}
+
+void Chip8::opAnnn(){
+  uint16_t addr = opcode & 0x0FFF;
+
+  indexReg = addr;
+}
+
+void Chip8::opBnnn(){
+   uint16_t addr = opcode & 0x0FFF;
+ 
+   pc = addr + registers[0];
+
+}
+
+void Chip8::opCxkk(){
+ // todo	
 }
