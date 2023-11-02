@@ -5,7 +5,7 @@ class Engine{
  public:
    Engine(int screenWidth, int screenHeight);
    void handleInput(uint8_t*);
-   void start(uint8_t*);
+   void start(uint8_t*, uint8_t**);
    ~Engine(){CloseWindow();}
 };
 
@@ -15,12 +15,17 @@ Engine::Engine(int screenWidth, int screenHeight){
 
 }
 
-void Engine::start(uint8_t* key){
+void Engine::start(uint8_t* key, uint8_t** video){
  while(!WindowShouldClose()){
    handleInput(key);	 
    BeginDrawing();
-      // TODO: draw sth later..
-      ClearBackground(RAYWHITE);
+      ClearBackground(BLACK);
+      for(int i = 0 ; i < 64 ; ++i){
+	for(int j = 0 ; j < 32 ; ++j){
+	  if(video[i][j] == 1)
+	    DrawPixel(i, j, WHITE);
+	}      
+      }
    EndDrawing();
  }	
 }
