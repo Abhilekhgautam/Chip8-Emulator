@@ -39,7 +39,7 @@ public:
   uint16_t indexReg;
   uint8_t stackPtr;
   uint8_t stack[16];
-  uint8_t video[64 * 32];
+  uint8_t video[64][32];
   uint16_t opcode;
 
   uint8_t VF;
@@ -280,7 +280,13 @@ void Chip8::opDxyn(){
    uint8_t n = opcode & (0x000F);
 
    for(auto i = indexReg ; i <= indexReg + n; ++i){
-    // TODO;
+    auto val = mem[i];
+    auto x_coordinate = registers[x];
+    auto y_coordinate = registers[y];
+    if(x_coordinate > 64) x_coordinate = x_coordinate % 64;
+    if(y_coordinate > 32) y_coordinate = y_coordinate % 32;
+
+    video[x_coordinate][y_coordinate] = val;
    }
 
 }
