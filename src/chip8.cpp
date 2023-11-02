@@ -201,7 +201,7 @@ void Chip8::op8xy4(){
   int temp = registers[x] + registers[y];
   if(temp > 255){
     VF = 1;	  
-  }
+  }else VF = 0;
   registers[x] = temp % 256;
 
 }
@@ -210,11 +210,11 @@ void Chip8::op8xy5(){
   uint8_t x = (opcode & (0x0F00)) >> 8u;
   uint8_t y = (opcode & (0x00F0)) >> 4u;
 
-  int temp = registers[x] + registers[y];
-  if(temp > 255){
+  if(registers[x] > registers[y]){
     VF = 1;	  
-  }
-  registers[x] = temp % 256;
+  } else VF = 0;
+
+  registers[x] = registers[y] - registers[x];
 }
 // buggy: the Chip8 ref seems to be ambigious.
 void Chip8::op8xy6(){
@@ -223,12 +223,19 @@ void Chip8::op8xy6(){
 
   if((registers[x] & 0x0001)){
    VF = 1;
-  }
+  }else VF = 0;
    registers[x] = registers[x] / 2;
 }
 
 void Chip8::op8xy7(){
- //todo	
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  uint8_t y = (opcode & (0x00F0)) >> 4u;
+
+  if(registers[y] > registers[x]) VF = 1;
+  else VF = 0;
+
+  registers[x] = registers[x] - registers[y];
+	
 }
 
 // buggy: the Chip8 ref seems to be ambigious.
@@ -412,7 +419,19 @@ void Chip8::opFx07(){
   registers[x] = delayTimer;
 }
 
-void Chip8::opFx0A(){}
+void Chip8::opFx0A(){
+   uint8_t x = (opcode & (0x0F00)) >> 8u;
+   bool stop = false;
+   while(!stop){
+     for(auto i = 0 ; i < 16 ; ++i){
+	if(keyboard[i] == 1){
+	  stop = true;
+	  registers[x] = keyboard[i];
+	  break;
+	}     
+     }	   
+   }
+}
 
 void Chip8::opFx15(){
   uint8_t x = (opcode & (0x0F00)) >> 8u;
@@ -436,7 +455,17 @@ void Chip8::opFx29(){
   indexReg = CHARACTERS_START_ADDRESS + 5 * val;
 }
 
-void Chip8::opFx33(){}
+void Chip8::opFx33(){
+  uint8_t x = (opcode & (0x0F00)) >> 8u;
+  uint8_t val = registers[x];
+
+  // TODO: use a loop
+  mem[indexReg + 2] = val % 10;
+  auto temp = val / 10;
+  mem[indexReg + 1] = val % 10;
+  temp = val / 10;
+  mem[indexReg] = val % 10;
+}
 
 void Chip8::opFx55(){
    uint8_t x = (opcode & (0x0F00)) >> 8u;
