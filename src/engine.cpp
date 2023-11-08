@@ -1,21 +1,14 @@
 #include <raylib.h>
 #include <cstdint>
 
-class Engine{
- public:
-   Engine(int screenWidth, int screenHeight);
-   void handleInput(uint8_t*);
-   void start(uint8_t*, uint8_t**);
-   ~Engine(){CloseWindow();}
-};
+#include "../include/engine.h"
 
 Engine::Engine(int screenWidth, int screenHeight){
   InitWindow(screenWidth, screenHeight, "CHIP8 Emulator");	
   SetTargetFPS(60);
-
 }
 
-void Engine::start(uint8_t* key, uint8_t** video){
+void Engine::start(uint8_t* key, uint8_t video[64][32]){
  while(!WindowShouldClose()){
    handleInput(key);	 
    BeginDrawing();
@@ -29,6 +22,8 @@ void Engine::start(uint8_t* key, uint8_t** video){
    EndDrawing();
  }	
 }
+
+Engine::~Engine(){CloseWindow();}
 
 void Engine::handleInput(uint8_t* key){
   if(IsKeyDown(KEY_ONE)){
