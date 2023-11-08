@@ -2,19 +2,20 @@
 
 class Chip8 {
 public:
-  uint8_t registers[16];
-  uint8_t mem[4096];
+  uint8_t registers[16] = {};
+  uint8_t mem[4096] = {};
   uint16_t pc;
   uint8_t delayTimer;
   uint8_t soundTimer;
-  uint8_t keyboard[16];
-  uint16_t indexReg;
+  uint8_t keyboard[16] = {};
+  uint16_t indexReg = {};
   uint8_t stackPtr;
-  uint8_t stack[16];
-  uint8_t video[64][32];
+  uint8_t stack[16] = {};
+  uint8_t video[64][32] = {};
   uint16_t opcode;
 
   uint8_t VF;
+
 public:
   Chip8();
   void loadMem(char const *filename);
@@ -54,4 +55,3 @@ public:
   void opFx55();
   void opFx65();
 };
-
