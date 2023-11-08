@@ -46,6 +46,7 @@ public:
 public:
   Chip8();
   void loadMem(char const *filename);
+  void insCycle();
   void op00E0();
   void op00EE();
   void op1nnn();
@@ -104,6 +105,62 @@ void Chip8::loadMem(char const *filename) {
   }
   insFile.close();
 }
+
+void Chip8::insCycle(){
+  //Fetch Instruction:
+  // Instruction are 2bytes; so fetch from pc & pc + 1 and embed into one
+  opcode = mem[pc] << 8u | mem[pc +1];
+
+  // increment the pc by 2 
+  pc = pc + 2;
+  //Decode and Execute 
+  if(opcode == 0x00E0) {op00E0(); return;}
+  else if (opcode == 0x00EE) {op00E0(); return;}
+
+  // extract every nibble from the opcode 
+  auto rightmost = opcode & (0x0001);
+  auto right     = (opcode & (0x0010)) >> 4u;
+  auto left      = (opcode & (0x0100)) >> 8u;
+  auto leftmost  = (opcode & (0x1000)) >> 12u;
+
+  if(leftmost == 1) {op1nnn(); return;}
+  else if(leftmost == 2) {op2nnn(); return;}
+  else if(leftmost == 3) {op3xkk(); return;}
+  else if(leftmost == 4) {op4xkk(); return;}
+  else if(leftmost == 5) {op5xy0(); return;}
+  else if(leftmost == 6) {op6xkk(); return;}
+  else if(leftmost == 7) {op7xkk(); return;}
+  else if(leftmost == 8){
+    if(rightmost == 0) {op8xy0(); return;}	  
+    else if(rightmost == 1) {op8xy1(); return;}
+    else if(rightmost == 2) {op8xy2(); return;}
+    else if(rightmost == 3) {op8xy3(); return;}
+    else if(rightmost == 4) {op8xy4(); return;}
+    else if(rightmost == 5) {op8xy5(); return;}
+    else if(rightmost == 6) {op8xy6(); return;}
+    else if(rightmost == 7) {op8xy7(); return;}	
+    else if(rightmost == 14) {op8xyE(); return;}
+  }
+ else if(leftmost == 9) {op9xy0(); return;}
+ else if(leftmost == 10) {opAnnn(); return;}
+ else if(leftmost == 11) {opBnnn(); return;}
+ else if(leftmost == 12) {opCxkk(); return;}
+ else if(leftmost == 13) {opDxyn(); return;}
+ else if(leftmost == 14 && rightmost == 14) {opEx9E(); return;}
+ else if(leftmost == 14 && rightmost == 1) {opExA1(); return;}
+ else if(leftmost == 15){
+  if(rightmost == 7) {opFx07(); return;}
+  else if(rightmost == 10) {opFx0A(); return;}
+  else if(rightmost == 5 && right == 1) {opFx15(); return;}
+  else if(rightmost == 8) {opFx18();}
+  else if(rightmost == 14) {opFx1E();}
+  else if(rightmost == 9) {opFx29();}
+  else if(rightmost == 3) {opFx33();}
+  else if(rightmost == 5 && right == 5) {opFx55();}
+  else if(rightmost == 5 && right == 6) {opFx65();}
+ }
+}
+
 // CLS: clears the display
 void Chip8::op00E0(){
  memset(video, 0, sizeof(video));	
@@ -216,7 +273,7 @@ void Chip8::op8xy5(){
 
   registers[x] = registers[y] - registers[x];
 }
-// buggy: the Chip8 ref seems to be ambigious.
+// buggy: the Chip8 ref seems to be ambiguous.
 void Chip8::op8xy6(){
   uint8_t x = (opcode & (0x0F00)) >> 8u;
   //uint8_t y = (opcode & (0x00F0)) >> 4u;
@@ -382,7 +439,7 @@ void Chip8::opExA1(){
 	if(keyboard[6] == 1) skip = true;
 	break;
      case 6:
-        if(keyboard[7] == 1) skip = true;
+         if(keyboard[7] == 1) skip = true;
 	break;
      case 13:
 	if(keyboard[8] == 1) skip = true;
