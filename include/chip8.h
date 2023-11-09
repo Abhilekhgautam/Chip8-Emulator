@@ -1,5 +1,7 @@
 #include <cstdint>
 
+#ifndef CHIP8_H
+#define CHIP8_H
 class Chip8 {
 public:
   uint8_t registers[16] = {};
@@ -55,3 +57,4 @@ public:
   void opFx55();
   void opFx65();
 };
+#endif
