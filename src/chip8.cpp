@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -46,7 +47,7 @@ void Chip8::loadMem(char const *filename) {
 void Chip8::insCycle() {
   // Fetch Instruction:
   //  Instruction are 2bytes; so fetch from pc & pc + 1 and embed into one
-  opcode = mem[pc] << 8u | mem[pc + 1];
+  opcode = (mem[pc] << 8u) | mem[pc + 1];
 
   // increment the pc by 2
   pc = pc + 2;
@@ -171,12 +172,12 @@ void Chip8::op00EE() {
 }
 // Jump to location nnn
 void Chip8::op1nnn() {
-  auto address = opcode & (0x0FFF);
+  uint16_t address = opcode & (0x0FFF);
   pc = address;
 }
 // CALL
 void Chip8::op2nnn() {
-  auto address = opcode & (0xFFF);
+  uint16_t address = opcode & (0xFFF);
   ++stackPtr;
   stack[stackPtr] = pc;
   pc = address;
@@ -341,7 +342,7 @@ void Chip8::opCxkk() {
 void Chip8::opDxyn() {
   uint8_t x = (opcode & (0x0F00)) >> 8u;
   uint8_t y = (opcode & (0x00F0)) >> 4u;
-  uint8_t n = opcode & (0x000F);
+  uint8_t n =opcode & (0x000F);
 
   for (auto i = indexReg; i <= indexReg + n; ++i) {
     auto val = mem[i];

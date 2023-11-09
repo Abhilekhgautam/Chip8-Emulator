@@ -12,7 +12,6 @@ int main(int argc, char **argv) {
   Engine engine(800, 400);
   Chip8 chip8;
   chip8.loadMem(argv[1]);
-  engine.start(chip8.keyboard, chip8.video);
+  engine.start(chip8);
 
-  chip8.insCycle();
 }

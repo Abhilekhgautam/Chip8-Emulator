@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <raylib.h>
-
+#include <iostream>
 #include "../include/engine.h"
 
 Engine::Engine(int screenWidth, int screenHeight) {
@@ -8,18 +8,25 @@ Engine::Engine(int screenWidth, int screenHeight) {
   SetTargetFPS(60);
 }
 
-void Engine::start(uint8_t *key, uint8_t video[64][32]) {
+void Engine::start(Chip8& chip8) {
   while (!WindowShouldClose()) {
-    handleInput(key);
+   
+  for(int i = 0 ; i < 64 ; ++i){
+    for(int j = 0 ; j < 32 ; ++j){
+     std::cout << chip8.video[i][j];	    
+    }	  
+  }
+    handleInput(chip8.keyboard);
     BeginDrawing();
     ClearBackground(BLACK);
     for (int i = 0; i < 64; ++i) {
       for (int j = 0; j < 32; ++j) {
-        if (video[i][j] == 1)
+        if (chip8.video[i][j] == 1)
           DrawPixel(i, j, WHITE);
       }
     }
     EndDrawing();
+    chip8.insCycle();
   }
 }
 
